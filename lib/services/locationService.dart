@@ -9,25 +9,30 @@ class LocationService {
   LocationModel _currentLocation;
   AddressModel _currentAddress;
   Placemark place;
-  Location location = Location();
+  Geolocator location = Geolocator();
   StreamController<LocationModel> _streamLocationController =
       StreamController<LocationModel>.broadcast();
 
   LocationService() {
-    location.requestPermission().then((granted) {
-      if (granted) {
-        location.onLocationChanged().listen((locationData) {
-          location.serviceEnabled().then((service) {
+    print('LocationService constructor started');
+    location.checkGeolocationPermissionStatus().then((granted) {
+      if (granted == GeolocationStatus.granted) {
+        location.getPositionStream().listen((locationData) {
+          print(locationData.latitude);
+          location.isLocationServiceEnabled().then((service) {
             if (locationData != null) {
               getAddressFromLatLng(
                   locationData.latitude, locationData.longitude);
+
+              print('LocationService constructor');
+              print(locationData.latitude);
               _streamLocationController.add(LocationModel(
-                  isServiceEnabled: service,
                   latitude: locationData.latitude,
                   longitude: locationData.longitude,
                   altitude: locationData.altitude,
                   speed: locationData.speed,
-                  address: _currentAddress));
+                  address: _currentAddress,
+                  timestamp: locationData.timestamp));
             }
           });
         });
@@ -41,15 +46,19 @@ class LocationService {
 
   Future<LocationModel> getLocation() async {
     try {
-      var _location = await location.getLocation();
-
-      if (_currentLocation.latitude != null) {
-        _currentLocation = LocationModel(
-            latitude: _location.latitude,
-            longitude: _location.longitude,
-            altitude: _location.altitude,
-            speed: _location.speed);
-      }
+      var _location = await location.getCurrentPosition();
+      getAddressFromLatLng(_location.latitude, _location.longitude);
+      await location.isLocationServiceEnabled().then((service) {
+        if (_location.latitude != null) {
+          _currentLocation = LocationModel(
+              latitude: _location.latitude,
+              longitude: _location.longitude,
+              altitude: _location.altitude,
+              speed: _location.speed,
+              address: _currentAddress,
+              timestamp: _location.timestamp);
+        }
+      });
     } catch (error) {
       print('Can\'t get the location, $error');
     }
@@ -63,7 +72,7 @@ class LocationService {
       List<Placemark> p =
           await Geolocator().placemarkFromCoordinates(latitude, longitude);
       place = p[0];
-      print(place);
+
       _currentAddress = AddressModel(
           locality: place.locality,
           postalCode: place.postalCode,
