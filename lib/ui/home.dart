@@ -84,12 +84,16 @@ class Home extends StatelessWidget {
               title: Text(
                   '${timestampText != null ? timestampText : loadingText}'),
               subtitle: Text('Last update'),
+              onTap: () => {
+                _showAlert(context, 'Last update', timestampText.toString())
+              },
             )),
             Card(
                 child: ListTile(
               leading: Icon(Icons.home),
               title: Text('${addressText != null ? addressText : loadingText}'),
               subtitle: Text('Address'),
+              onTap: () => {_showAlert(context, 'Address', addressText)},
             )),
             Card(
                 child: ListTile(
@@ -97,6 +101,9 @@ class Home extends StatelessWidget {
               title: Text(
                   '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
               subtitle: Text('Coordinates'),
+              onTap: () => {
+                _showAlert(context, 'Coordinates', latitudeAndLongitudeText)
+              },
             )),
             Card(
                 child: ListTile(
@@ -104,18 +111,29 @@ class Home extends StatelessWidget {
               title:
                   Text('${altitudeText != null ? altitudeText : loadingText}'),
               subtitle: Text('Altitude'),
+              onTap: () => {_showAlert(context, 'Altitude', altitudeText)},
             )),
             Card(
                 child: ListTile(
               leading: Icon(Icons.arrow_forward_ios),
               title: Text('${speedText != null ? speedText : loadingText}'),
               subtitle: Text('Speed'),
+              onTap: () => {_showAlert(context, 'Speed', speedText)},
             )),
           ],
         ),
       ]),
       bottomNavigationBar: new BottomMenu(),
     );
+  }
+
+  void _showAlert(BuildContext context, String title, String content) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(title),
+              content: Text(content),
+            ));
   }
 
   double round(number) {
