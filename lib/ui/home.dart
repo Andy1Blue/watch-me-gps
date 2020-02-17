@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
+import 'package:watch_me_gps/ui/bottomMenu.dart';
 
 class Home extends StatelessWidget {
   const Home({Key key}) : super(key: key);
 
   Widget build(BuildContext context) {
-    final navigationItems = <BottomNavigationBarItem>[
-      new BottomNavigationBarItem(
-          icon: new Icon(Icons.home, color: Colors.red), title: new Text("")),
-      new BottomNavigationBarItem(
-          icon: new Icon(Icons.home, color: Colors.red), title: new Text(""))
-    ];
-
     final noGpsAlert = AlertDialog(
       title: Text("No GPS!"),
       content: Text("Check your GPS settings."),
@@ -74,50 +68,54 @@ class Home extends StatelessWidget {
     // }
 
     return new Scaffold(
-        appBar: AppBar(
-          title: Text('Watch Me GPS'),
-          backgroundColor: Colors.blueAccent,
+      appBar: AppBar(
+        title: Text('Watch Me GPS'),
+        backgroundColor: Colors.black87,
+      ),
+      backgroundColor: Colors.grey[100],
+      body:
+          new ListView(padding: const EdgeInsets.all(10.0), children: <Widget>[
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Card(
+                child: ListTile(
+              leading: Icon(Icons.calendar_today),
+              title: Text(
+                  '${timestampText != null ? timestampText : loadingText}'),
+              subtitle: Text('Last update'),
+            )),
+            Card(
+                child: ListTile(
+              leading: Icon(Icons.home),
+              title: Text('${addressText != null ? addressText : loadingText}'),
+              subtitle: Text('Address'),
+            )),
+            Card(
+                child: ListTile(
+              leading: Icon(Icons.gps_fixed),
+              title: Text(
+                  '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
+              subtitle: Text('Coordinates'),
+            )),
+            Card(
+                child: ListTile(
+              leading: Icon(Icons.arrow_upward),
+              title:
+                  Text('${altitudeText != null ? altitudeText : loadingText}'),
+              subtitle: Text('Altitude'),
+            )),
+            Card(
+                child: ListTile(
+              leading: Icon(Icons.arrow_forward_ios),
+              title: Text('${speedText != null ? speedText : loadingText}'),
+              subtitle: Text('Speed'),
+            )),
+          ],
         ),
-        backgroundColor: Colors.blueAccent,
-        body: new ListView(padding: const EdgeInsets.all(10.0), children: <
-            Widget>[
-          Card(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.calendar_today),
-                  title: Text(
-                      '${timestampText != null ? timestampText : loadingText}'),
-                  subtitle: Text('Last update'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.home),
-                  title: Text(
-                      '${addressText != null ? addressText : loadingText}'),
-                  subtitle: Text('Address'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.gps_fixed),
-                  title: Text(
-                      '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
-                  subtitle: Text('Coordinates'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.arrow_upward),
-                  title: Text(
-                      '${altitudeText != null ? altitudeText : loadingText}'),
-                  subtitle: Text('Altitude'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.arrow_forward_ios),
-                  title: Text('${speedText != null ? speedText : loadingText}'),
-                  subtitle: Text('Speed'),
-                ),
-              ],
-            ),
-          ),
-        ]));
+      ]),
+      bottomNavigationBar: new BottomMenu(),
+    );
   }
 
   double round(number) {
