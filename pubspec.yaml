@@ -26,6 +26,7 @@ dependencies:
 
   # Geolocator plugin
   geolocator: ^5.1.3
+  google_maps_flutter: ^0.5.11
   provider:
   location: ^2.3.5
 

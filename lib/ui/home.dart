@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
-import 'package:watch_me_gps/ui/bottomMenu.dart';
 
 class Home extends StatelessWidget {
   const Home({Key key}) : super(key: key);
@@ -68,11 +67,6 @@ class Home extends StatelessWidget {
     // }
 
     return new Scaffold(
-      appBar: AppBar(
-        title: Text('Watch Me GPS'),
-        backgroundColor: Colors.black87,
-      ),
-      backgroundColor: Colors.grey[100],
       body:
           new ListView(padding: const EdgeInsets.all(10.0), children: <Widget>[
         Column(
@@ -123,7 +117,6 @@ class Home extends StatelessWidget {
           ],
         ),
       ]),
-      bottomNavigationBar: new BottomMenu(),
     );
   }
 
