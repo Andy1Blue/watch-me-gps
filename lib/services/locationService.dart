@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart';
 import 'package:watch_me_gps/models/addressModel.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
 

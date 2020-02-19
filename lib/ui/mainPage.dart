@@ -41,7 +41,7 @@ class Navigation extends State<MainPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Watch Me GPS'),
-          backgroundColor: Colors.black87,
+          backgroundColor: Colors.black,
         ),
         backgroundColor: Colors.grey[100],
         body: WillPopScope(
