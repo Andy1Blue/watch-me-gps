@@ -39,58 +39,60 @@ class Navigation extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Watch Me GPS'),
-          backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text('Watch Me GPS'),
+        backgroundColor: Colors.black,
+      ),
+      backgroundColor: Colors.grey[100],
+      body: WillPopScope(
+        onWillPop: () async {
+          if (_navigatorKey.currentState.canPop()) {
+            _navigatorKey.currentState.pop();
+            return false;
+          }
+          return true;
+        },
+        child: Navigator(
+          key: _navigatorKey,
+          initialRoute: HomeViewRoute,
+          onGenerateRoute: (RouteSettings settings) {
+            WidgetBuilder builder;
+            switch (settings.name) {
+              case HomeViewRoute:
+                return MaterialPageRoute(builder: (context) => Home());
+              case MapViewRoute:
+                return MaterialPageRoute(builder: (context) => Map());
+              case SettingViewRoute:
+                return MaterialPageRoute(builder: (context) => Setting());
+              default:
+                return MaterialPageRoute(builder: (context) => Home());
+            }
+            return MaterialPageRoute(
+              builder: builder,
+              settings: settings,
+            );
+          },
         ),
-        backgroundColor: Colors.grey[100],
-        body: WillPopScope(
-            onWillPop: () async {
-              if (_navigatorKey.currentState.canPop()) {
-                _navigatorKey.currentState.pop();
-                return false;
-              }
-              return true;
-            },
-            child: Navigator(
-              key: _navigatorKey,
-              initialRoute: HomeViewRoute,
-              onGenerateRoute: (RouteSettings settings) {
-                WidgetBuilder builder;
-                switch (settings.name) {
-                  case HomeViewRoute:
-                    return MaterialPageRoute(builder: (context) => Home());
-                  case MapViewRoute:
-                    return MaterialPageRoute(builder: (context) => Map());
-                  case SettingViewRoute:
-                    return MaterialPageRoute(builder: (context) => Setting());
-                  default:
-                    return MaterialPageRoute(builder: (context) => Home());
-                }
-                return MaterialPageRoute(
-                  builder: builder,
-                  settings: settings,
-                );
-              },
-            )),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.black,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
-          items: [
-            new BottomNavigationBarItem(
-              icon: new Icon(Icons.home, color: Colors.white),
-              title: new Text("Home"),
-            ),
-            new BottomNavigationBarItem(
-                icon: new Icon(Icons.map, color: Colors.white),
-                title: new Text("Map")),
-            new BottomNavigationBarItem(
-                icon: new Icon(Icons.settings, color: Colors.white),
-                title: new Text("Setting"))
-          ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-        ));
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        items: [
+          new BottomNavigationBarItem(
+            icon: new Icon(Icons.home, color: Colors.white),
+            title: new Text("Home"),
+          ),
+          new BottomNavigationBarItem(
+              icon: new Icon(Icons.map, color: Colors.white),
+              title: new Text("Map")),
+          new BottomNavigationBarItem(
+              icon: new Icon(Icons.settings, color: Colors.white),
+              title: new Text("Setting"))
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
   }
 }

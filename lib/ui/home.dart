@@ -67,56 +67,60 @@ class Home extends StatelessWidget {
     // }
 
     return new Scaffold(
-      body:
-          new ListView(padding: const EdgeInsets.all(10.0), children: <Widget>[
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Card(
+      body: new ListView(
+        padding: const EdgeInsets.all(10.0),
+        children: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Card(
+                  child: ListTile(
+                leading: Icon(Icons.calendar_today),
+                title: Text(
+                    '${timestampText != null ? timestampText : loadingText}'),
+                subtitle: Text('Last update'),
+                onTap: () => {
+                  _showAlert(context, 'Last update', timestampText.toString())
+                },
+              )),
+              Card(
+                  child: ListTile(
+                leading: Icon(Icons.home),
+                title:
+                    Text('${addressText != null ? addressText : loadingText}'),
+                subtitle: Text('Address'),
+                onTap: () => {_showAlert(context, 'Address', addressText)},
+              )),
+              Card(
+                  child: ListTile(
+                leading: Icon(Icons.gps_fixed),
+                title: Text(
+                    '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
+                subtitle: Text('Coordinates'),
+                onTap: () => {
+                  _showAlert(context, 'Coordinates', latitudeAndLongitudeText)
+                },
+              )),
+              Card(
+                  child: ListTile(
+                leading: Icon(Icons.arrow_upward),
+                title: Text(
+                    '${altitudeText != null ? altitudeText : loadingText}'),
+                subtitle: Text('Altitude'),
+                onTap: () => {_showAlert(context, 'Altitude', altitudeText)},
+              )),
+              Card(
                 child: ListTile(
-              leading: Icon(Icons.calendar_today),
-              title: Text(
-                  '${timestampText != null ? timestampText : loadingText}'),
-              subtitle: Text('Last update'),
-              onTap: () => {
-                _showAlert(context, 'Last update', timestampText.toString())
-              },
-            )),
-            Card(
-                child: ListTile(
-              leading: Icon(Icons.home),
-              title: Text('${addressText != null ? addressText : loadingText}'),
-              subtitle: Text('Address'),
-              onTap: () => {_showAlert(context, 'Address', addressText)},
-            )),
-            Card(
-                child: ListTile(
-              leading: Icon(Icons.gps_fixed),
-              title: Text(
-                  '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
-              subtitle: Text('Coordinates'),
-              onTap: () => {
-                _showAlert(context, 'Coordinates', latitudeAndLongitudeText)
-              },
-            )),
-            Card(
-                child: ListTile(
-              leading: Icon(Icons.arrow_upward),
-              title:
-                  Text('${altitudeText != null ? altitudeText : loadingText}'),
-              subtitle: Text('Altitude'),
-              onTap: () => {_showAlert(context, 'Altitude', altitudeText)},
-            )),
-            Card(
-                child: ListTile(
-              leading: Icon(Icons.arrow_forward_ios),
-              title: Text('${speedText != null ? speedText : loadingText}'),
-              subtitle: Text('Speed'),
-              onTap: () => {_showAlert(context, 'Speed', speedText)},
-            )),
-          ],
-        ),
-      ]),
+                  leading: Icon(Icons.arrow_forward_ios),
+                  title: Text('${speedText != null ? speedText : loadingText}'),
+                  subtitle: Text('Speed'),
+                  onTap: () => {_showAlert(context, 'Speed', speedText)},
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

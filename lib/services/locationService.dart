@@ -13,18 +13,13 @@ class LocationService {
       StreamController<LocationModel>.broadcast();
 
   LocationService() {
-    print('LocationService constructor started');
     location.checkGeolocationPermissionStatus().then((granted) {
       if (granted == GeolocationStatus.granted) {
         location.getPositionStream().listen((locationData) {
-          print(locationData.latitude);
           location.isLocationServiceEnabled().then((service) {
             if (locationData != null) {
               getAddressFromLatLng(
                   locationData.latitude, locationData.longitude);
-
-              print('LocationService constructor');
-              print(locationData.latitude);
               _streamLocationController.add(LocationModel(
                   latitude: locationData.latitude,
                   longitude: locationData.longitude,

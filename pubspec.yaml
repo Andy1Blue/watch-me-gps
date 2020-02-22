@@ -30,6 +30,7 @@ dependencies:
   flutter_map: any
   provider:
   location: ^2.3.5
+  shared_preferences: ^0.5.4+8 
 
 dev_dependencies:
   flutter_test:
