@@ -48,7 +48,7 @@ class LocationService {
                     '${locationData.timestamp}/${locationData.speed}/null}',
               };
 
-              // FetchLocation(dataToSend);
+              FetchLocation(dataToSend);
             }
           });
         });
