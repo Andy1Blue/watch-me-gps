@@ -4,6 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
+import 'package:watch_me_gps/services/sendSms.dart';
+import 'package:watch_me_gps/services/sharedPreferencesService.dart';
 
 class Map extends StatefulWidget {
   const Map({Key key}) : super(key: key);
@@ -19,27 +21,7 @@ class _MyAppState extends State<Map> {
 
   Widget build(BuildContext context) {
     var location = Provider.of<LocationModel>(context);
-
-    void _showSmsDialog() {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: new Text("SMS"),
-            content: new Text("SMS has been send to..."),
-            actions: <Widget>[
-              new FlatButton(
-                child: new Text("Ok"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
+    List<String> phoneNumber = [];
     String addressText;
     if (location?.address?.locality != null) {
       addressText = '';
@@ -52,6 +34,50 @@ class _MyAppState extends State<Map> {
       if (location.address.subThoroughfare != '') {
         addressText += location.address.subThoroughfare + ' ';
       }
+    }
+    String googleLocationLinkText;
+    if (location != null) {
+      googleLocationLinkText =
+          'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
+    }
+
+    void _showSmsDialog() {
+      SharedPreferencesService()
+          .loadData('phoneNumber')
+          .then((phoneNumberValue) {
+        setState(() {
+          phoneNumber.add(phoneNumberValue);
+        });
+      });
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: new Text("Do you really want send your position by SMS?"),
+            content: new Text(
+                "Recipient: ${phoneNumber[0]}\nMessage:\n$googleLocationLinkText\n${addressText != null ? addressText : ''}"),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text("Send!"),
+                onPressed: () {
+                  SendSms('$googleLocationLinkText', phoneNumber);
+                  if (addressText != null) {
+                    SendSms('$addressText', phoneNumber);
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+              new FlatButton(
+                child: new Text("Dont send!"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
 
     FlutterMap flutterMap = FlutterMap(
@@ -118,7 +144,7 @@ class _MyAppState extends State<Map> {
             Container(
               padding: const EdgeInsets.all(10.0),
               child: Align(
-                  alignment: Alignment.bottomLeft,
+                  alignment: Alignment.bottomRight,
                   child: FloatingActionButton(
                       child: Icon(Icons.sms),
                       backgroundColor: Colors.black87,
@@ -130,9 +156,9 @@ class _MyAppState extends State<Map> {
                 ? Container(
                     padding: const EdgeInsets.all(10.0),
                     child: Align(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.bottomLeft,
                       child: FloatingActionButton(
-                          child: Icon(Icons.gps_fixed),
+                          child: Icon(Icons.gps_off),
                           backgroundColor: Colors.black87,
                           onPressed: () {
                             setState(() {
@@ -144,9 +170,9 @@ class _MyAppState extends State<Map> {
                 : Container(
                     padding: const EdgeInsets.all(10.0),
                     child: Align(
-                      alignment: Alignment.bottomRight,
+                      alignment: Alignment.bottomLeft,
                       child: FloatingActionButton(
-                          child: Icon(Icons.gps_off),
+                          child: Icon(Icons.gps_fixed),
                           backgroundColor: Colors.black87,
                           onPressed: () {
                             setState(() {

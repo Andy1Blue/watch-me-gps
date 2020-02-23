@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
+import 'package:watch_me_gps/services/sendSms.dart';
+import 'package:watch_me_gps/services/sharedPreferencesService.dart';
 
 class Home extends StatelessWidget {
   const Home({Key key}) : super(key: key);
@@ -62,63 +64,123 @@ class Home extends StatelessWidget {
 
     final String loadingText = '-';
 
-    // if (location?.latitude == null) {
-    // LocationService().getLocation();
-    // }
+    List<String> phoneNumber = [];
+    String googleLocationLinkText;
+    if (location != null) {
+      googleLocationLinkText =
+          'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
+    }
+
+    void _showSmsDialog() {
+      SharedPreferencesService()
+          .loadData('phoneNumber')
+          .then((phoneNumberValue) {
+        phoneNumber.add(phoneNumberValue);
+      });
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: new Text("Do you really want send your position by SMS?"),
+            content: new Text(
+                "Recipient: ${phoneNumber[0]}\nMessage:\n$googleLocationLinkText\n${addressText != null ? addressText : ''}"),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text("Send!"),
+                onPressed: () {
+                  SendSms('$googleLocationLinkText', phoneNumber);
+                  if (addressText != null) {
+                    SendSms('$addressText', phoneNumber);
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+              new FlatButton(
+                child: new Text("Dont send!"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
 
     return new Scaffold(
-      body: new ListView(
-        padding: const EdgeInsets.all(10.0),
-        children: <Widget>[
-          Column(
-            mainAxisSize: MainAxisSize.min,
+      body: Stack(
+        children: [
+          new ListView(
+            padding: const EdgeInsets.all(10.0),
             children: <Widget>[
-              Card(
-                  child: ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text(
-                    '${timestampText != null ? timestampText : loadingText}'),
-                subtitle: Text('Last update'),
-                onTap: () => {
-                  _showAlert(context, 'Last update', timestampText.toString())
-                },
-              )),
-              Card(
-                  child: ListTile(
-                leading: Icon(Icons.home),
-                title:
-                    Text('${addressText != null ? addressText : loadingText}'),
-                subtitle: Text('Address'),
-                onTap: () => {_showAlert(context, 'Address', addressText)},
-              )),
-              Card(
-                  child: ListTile(
-                leading: Icon(Icons.gps_fixed),
-                title: Text(
-                    '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
-                subtitle: Text('Coordinates'),
-                onTap: () => {
-                  _showAlert(context, 'Coordinates', latitudeAndLongitudeText)
-                },
-              )),
-              Card(
-                  child: ListTile(
-                leading: Icon(Icons.arrow_upward),
-                title: Text(
-                    '${altitudeText != null ? altitudeText : loadingText}'),
-                subtitle: Text('Altitude'),
-                onTap: () => {_showAlert(context, 'Altitude', altitudeText)},
-              )),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.arrow_forward_ios),
-                  title: Text('${speedText != null ? speedText : loadingText}'),
-                  subtitle: Text('Speed'),
-                  onTap: () => {_showAlert(context, 'Speed', speedText)},
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Card(
+                      child: ListTile(
+                    leading: Icon(Icons.calendar_today),
+                    title: Text(
+                        '${timestampText != null ? timestampText : loadingText}'),
+                    subtitle: Text('Last update'),
+                    onTap: () => {
+                      _showAlert(
+                          context, 'Last update', timestampText.toString())
+                    },
+                  )),
+                  Card(
+                      child: ListTile(
+                    leading: Icon(Icons.home),
+                    title: Text(
+                        '${addressText != null ? addressText : loadingText}'),
+                    subtitle: Text('Address'),
+                    onTap: () => {_showAlert(context, 'Address', addressText)},
+                  )),
+                  Card(
+                      child: ListTile(
+                    leading: Icon(Icons.gps_fixed),
+                    title: Text(
+                        '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
+                    subtitle: Text('Coordinates'),
+                    onTap: () => {
+                      _showAlert(
+                          context, 'Coordinates', latitudeAndLongitudeText)
+                    },
+                  )),
+                  Card(
+                      child: ListTile(
+                    leading: Icon(Icons.arrow_upward),
+                    title: Text(
+                        '${altitudeText != null ? altitudeText : loadingText}'),
+                    subtitle: Text('Altitude'),
+                    onTap: () =>
+                        {_showAlert(context, 'Altitude', altitudeText)},
+                  )),
+                  Card(
+                    child: ListTile(
+                      leading: Icon(Icons.arrow_forward_ios),
+                      title: Text(
+                          '${speedText != null ? speedText : loadingText}'),
+                      subtitle: Text('Speed'),
+                      onTap: () => {_showAlert(context, 'Speed', speedText)},
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          Container(
+            padding: const EdgeInsets.all(10.0),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                  child: Icon(Icons.sms),
+                  backgroundColor: Colors.black87,
+                  onPressed: () {
+                    _showSmsDialog();
+                  }),
+            ),
+          )
         ],
       ),
     );

@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:watch_me_gps/models/addressModel.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
+import 'package:watch_me_gps/services/fetchLocation.dart';
+import 'package:watch_me_gps/models/sendDataModel.dart';
+import 'package:watch_me_gps/services/sharedPreferencesService.dart';
 
 class LocationService {
   LocationModel _currentLocation;
   AddressModel _currentAddress;
   Placemark place;
+  String userName;
   Geolocator location = Geolocator();
   StreamController<LocationModel> _streamLocationController =
       StreamController<LocationModel>.broadcast();
@@ -20,6 +24,7 @@ class LocationService {
             if (locationData != null) {
               getAddressFromLatLng(
                   locationData.latitude, locationData.longitude);
+
               _streamLocationController.add(LocationModel(
                   latitude: locationData.latitude,
                   longitude: locationData.longitude,
@@ -27,6 +32,23 @@ class LocationService {
                   speed: locationData.speed,
                   address: _currentAddress,
                   timestamp: locationData.timestamp));
+
+              SharedPreferencesService()
+                  .loadData('userName')
+                  .then((userNameValue) {
+                this.userName = userNameValue;
+              });
+
+              var dataToSend = {
+                'user': '${userName != null ? userName : 'Flutter'}',
+                'location':
+                    '${locationData.latitude},${locationData.longitude}',
+                'data': '${locationData.timestamp}',
+                'other':
+                    '${locationData.timestamp}/${locationData.speed}/null}',
+              };
+
+              // FetchLocation(dataToSend);
             }
           });
         });
