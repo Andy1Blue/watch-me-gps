@@ -16,7 +16,10 @@ class Map extends StatefulWidget {
 
 class _MyAppState extends State<Map> {
   bool isTapped = false;
-  LatLng _location;
+  double userZoom = 18.0;
+  double maxZoom = 19.0;
+  double minZoom = 3.0;
+  LatLng _location = LatLng(1, 1);
   MapController mapController = MapController();
 
   Widget build(BuildContext context) {
@@ -39,6 +42,22 @@ class _MyAppState extends State<Map> {
     if (location != null) {
       googleLocationLinkText =
           'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
+    }
+
+    void _zoomUp() {
+      setState(() {
+        if (maxZoom > userZoom) {
+          userZoom += 1;
+        }
+      });
+    }
+
+    void _zoomDown() {
+      setState(() {
+        if (minZoom < userZoom) {
+          userZoom -= 1.0;
+        }
+      });
     }
 
     void _showSmsDialog() {
@@ -87,9 +106,9 @@ class _MyAppState extends State<Map> {
           isTapped = true;
         },
         center: _location,
-        zoom: 18.0,
-        // maxZoom: 5.0,
-        // minZoom: 3.0,
+        zoom: userZoom,
+        maxZoom: maxZoom,
+        minZoom: minZoom,
       ),
       layers: [
         TileLayerOptions(
@@ -116,7 +135,7 @@ class _MyAppState extends State<Map> {
 
       if (mapController.ready) {
         if (isTapped == false) {
-          mapController.move(_location, 18.0);
+          mapController.move(_location, userZoom);
         }
       }
     });
@@ -141,6 +160,50 @@ class _MyAppState extends State<Map> {
                 ),
               ),
             ),
+            !isTapped
+                ? Container(
+                    padding: const EdgeInsets.only(top: 315.0, right: 5.0),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: ButtonTheme(
+                        minWidth: 40.0,
+                        height: 40.0,
+                        child: new RaisedButton(
+                          color: Colors.white,
+                          child: new Text(
+                            "+",
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                          onPressed: () {
+                            _zoomUp();
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(),
+            !isTapped
+                ? Container(
+                    padding: const EdgeInsets.only(top: 270.0, right: 5.0),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: ButtonTheme(
+                        minWidth: 40.0,
+                        height: 40.0,
+                        child: new RaisedButton(
+                          color: Colors.white,
+                          child: new Text(
+                            "-",
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                          onPressed: () {
+                            _zoomDown();
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(),
             Container(
               padding: const EdgeInsets.all(10.0),
               child: Align(
