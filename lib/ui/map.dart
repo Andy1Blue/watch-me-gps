@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
+import 'package:watch_me_gps/helper.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
 import 'package:watch_me_gps/services/sendSms.dart';
 import 'package:watch_me_gps/services/sharedPreferencesService.dart';
@@ -15,12 +17,26 @@ class Map extends StatefulWidget {
 }
 
 class _MyAppState extends State<Map> {
+  void initState() {
+    super.initState();
+    setData();
+  }
+
+  Helper helper = new Helper();
   bool isTapped = false;
   double userZoom = 18.0;
   double maxZoom = 19.0;
   double minZoom = 3.0;
   LatLng _location = LatLng(1, 1);
   MapController mapController = MapController();
+
+  setData() {
+    SharedPreferencesService().loadDoubleData('userZoom').then((userZoomSP) {
+      setState(() {
+        userZoom = userZoomSP;
+      });
+    });
+  }
 
   Widget build(BuildContext context) {
     var location = Provider.of<LocationModel>(context);
@@ -44,25 +60,35 @@ class _MyAppState extends State<Map> {
           'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
     }
 
+    String speedText;
+    if (location?.speed != null) {
+      speedText = helper.msToKmh(location.speed).toString() + ' km/h';
+    }
+
+    String messageToSend =
+        '$addressText | $speedText | $googleLocationLinkText';
+
     void _zoomUp() {
-      setState(() {
-        if (maxZoom > userZoom) {
-          userZoom += 1;
-        }
-      });
+      if (maxZoom > userZoom) {
+        setState(() {
+          userZoom += 1.0;
+          SharedPreferencesService().saveDoubleData('userZoom', userZoom);
+        });
+      }
     }
 
     void _zoomDown() {
-      setState(() {
-        if (minZoom < userZoom) {
+      if (minZoom < userZoom) {
+        setState(() {
           userZoom -= 1.0;
-        }
-      });
+          SharedPreferencesService().saveDoubleData('userZoom', userZoom);
+        });
+      }
     }
 
     void _showSmsDialog() {
       SharedPreferencesService()
-          .loadData('phoneNumber')
+          .loadStringData('phoneNumber')
           .then((phoneNumberValue) {
         setState(() {
           phoneNumber.add(phoneNumberValue);
@@ -75,15 +101,12 @@ class _MyAppState extends State<Map> {
           return AlertDialog(
             title: new Text("Do you really want send your position by SMS?"),
             content: new Text(
-                "Recipient: ${phoneNumber[0]}\nMessage:\n$googleLocationLinkText\n${addressText != null ? addressText : ''}"),
+                "Recipient: ${phoneNumber[0]}\nMessage:\n$messageToSend}"),
             actions: <Widget>[
               new FlatButton(
                 child: new Text("Send!"),
                 onPressed: () {
-                  SendSms('$googleLocationLinkText', phoneNumber);
-                  if (addressText != null) {
-                    SendSms('$addressText', phoneNumber);
-                  }
+                  SendSms('$messageToSend', phoneNumber);
                   Navigator.of(context).pop();
                 },
               ),
@@ -214,6 +237,19 @@ class _MyAppState extends State<Map> {
                       onPressed: () {
                         _showSmsDialog();
                       })),
+            ),
+            Container(
+              padding: const EdgeInsets.only(
+                  top: 10.0, left: 10.0, bottom: 70.0, right: 10.0),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                    child: Icon(Icons.share),
+                    backgroundColor: Colors.black87,
+                    onPressed: () {
+                      Share.share('$messageToSend');
+                    }),
+              ),
             ),
             isTapped
                 ? Container(

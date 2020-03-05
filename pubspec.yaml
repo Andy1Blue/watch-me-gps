@@ -35,6 +35,8 @@ dependencies:
   flutter_dotenv: ^2.1.0
   flutter_sms: ^2.0.0+2
   # sms: ^0.2.0
+  app_settings: 3.0.1
+  share: 0.6.3+6
 
 dev_dependencies:
   flutter_test:

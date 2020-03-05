@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
+import 'package:watch_me_gps/helper.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
 import 'package:watch_me_gps/services/sendSms.dart';
 import 'package:watch_me_gps/services/sharedPreferencesService.dart';
@@ -9,6 +11,15 @@ class Home extends StatelessWidget {
   const Home({Key key}) : super(key: key);
 
   Widget build(BuildContext context) {
+    Helper helper = new Helper();
+    var location = Provider.of<LocationModel>(context);
+
+    final loader = SizedBox(
+        height: 40.0,
+        width: 40.0,
+        child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Colors.blue), strokeWidth: 5.0));
+
     final noGpsAlert = AlertDialog(
       title: Text("No GPS!"),
       content: Text("Check your GPS settings."),
@@ -20,27 +31,7 @@ class Home extends StatelessWidget {
       ],
     );
 
-    var location = Provider.of<LocationModel>(context);
-
-    String addressText;
-    if (location?.address?.postalCode != null) {
-      addressText = '';
-      if (location.address.postalCode != '') {
-        addressText += location.address.postalCode + ' ';
-      }
-      if (location.address.locality != '') {
-        addressText += location.address.locality + ' ';
-      }
-      if (location.address.thoroughfare != '') {
-        addressText += location.address.thoroughfare + ' ';
-      }
-      if (location.address.subThoroughfare != '') {
-        addressText += location.address.subThoroughfare + ' ';
-      }
-      if (location.address.country != '') {
-        addressText += location.address.country + ' ';
-      }
-    }
+    String addressText = helper.setAdressText(location);
 
     String latitudeAndLongitudeText;
     if (location?.latitude != null) {
@@ -49,12 +40,12 @@ class Home extends StatelessWidget {
 
     String altitudeText;
     if (location?.altitude != null) {
-      altitudeText = round(location.altitude).toString() + ' m';
+      altitudeText = helper.round(location.altitude).toString() + ' m';
     }
 
     String speedText;
     if (location?.speed != null) {
-      speedText = msToKmh(location.speed).toString() + ' km/h';
+      speedText = helper.msToKmh(location.speed).toString() + ' km/h';
     }
 
     DateTime timestampText;
@@ -71,9 +62,12 @@ class Home extends StatelessWidget {
           'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
     }
 
+    String messageToSend =
+        '$addressText | $speedText | $googleLocationLinkText';
+
     void _showSmsDialog() {
       SharedPreferencesService()
-          .loadData('phoneNumber')
+          .loadStringData('phoneNumber')
           .then((phoneNumberValue) {
         phoneNumber.add(phoneNumberValue);
       });
@@ -84,15 +78,12 @@ class Home extends StatelessWidget {
           return AlertDialog(
             title: new Text("Do you really want send your position by SMS?"),
             content: new Text(
-                "Recipient: ${phoneNumber[0]}\nMessage:\n$googleLocationLinkText\n${addressText != null ? addressText : ''}"),
+                "Recipient: ${phoneNumber[0]}\nMessage:\n$messageToSend"),
             actions: <Widget>[
               new FlatButton(
                 child: new Text("Send!"),
                 onPressed: () {
-                  SendSms('$googleLocationLinkText', phoneNumber);
-                  if (addressText != null) {
-                    SendSms('$addressText', phoneNumber);
-                  }
+                  SendSms('$messageToSend', phoneNumber);
                   Navigator.of(context).pop();
                 },
               ),
@@ -108,64 +99,93 @@ class Home extends StatelessWidget {
       );
     }
 
+    var cardLocalisationData = [
+      {
+        'title': '${timestampText ?? '-'}',
+        'description': 'Last update',
+        'icon': Icons.calendar_today
+      },
+      {
+        'title': '${addressText ?? '-'}',
+        'description': 'Address',
+        'icon': Icons.home
+      },
+      {
+        'title': '${latitudeAndLongitudeText ?? '-'}',
+        'description': 'Coordinates',
+        'icon': Icons.gps_fixed
+      },
+      {
+        'title': '${altitudeText ?? '-'}',
+        'description': 'Altitude',
+        'icon': Icons.arrow_upward
+      },
+      {
+        'title': '${speedText ?? '-'}',
+        'description': 'Spped',
+        'icon': Icons.arrow_forward_ios
+      },
+    ];
+
     return new Scaffold(
+      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
       body: Stack(
         children: [
-          new ListView(
-            padding: const EdgeInsets.all(10.0),
+          new Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Card(
-                      child: ListTile(
-                    leading: Icon(Icons.calendar_today),
-                    title: Text(
-                        '${timestampText != null ? timestampText : loadingText}'),
-                    subtitle: Text('Last update'),
-                    onTap: () => {
-                      _showAlert(
-                          context, 'Last update', timestampText.toString())
-                    },
-                  )),
-                  Card(
-                      child: ListTile(
-                    leading: Icon(Icons.home),
-                    title: Text(
-                        '${addressText != null ? addressText : loadingText}'),
-                    subtitle: Text('Address'),
-                    onTap: () => {_showAlert(context, 'Address', addressText)},
-                  )),
-                  Card(
-                      child: ListTile(
-                    leading: Icon(Icons.gps_fixed),
-                    title: Text(
-                        '${latitudeAndLongitudeText != null ? latitudeAndLongitudeText : loadingText}'),
-                    subtitle: Text('Coordinates'),
-                    onTap: () => {
-                      _showAlert(
-                          context, 'Coordinates', latitudeAndLongitudeText)
-                    },
-                  )),
-                  Card(
-                      child: ListTile(
-                    leading: Icon(Icons.arrow_upward),
-                    title: Text(
-                        '${altitudeText != null ? altitudeText : loadingText}'),
-                    subtitle: Text('Altitude'),
-                    onTap: () =>
-                        {_showAlert(context, 'Altitude', altitudeText)},
-                  )),
-                  Card(
-                    child: ListTile(
-                      leading: Icon(Icons.arrow_forward_ios),
-                      title: Text(
-                          '${speedText != null ? speedText : loadingText}'),
-                      subtitle: Text('Speed'),
-                      onTap: () => {_showAlert(context, 'Speed', speedText)},
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cardLocalisationData.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      padding: const EdgeInsets.only(
+                          left: 5.0, right: 5.0, top: 3.0),
+                      child: Card(
+                        color: Color.fromRGBO(64, 75, 96, 1.0),
+                        elevation: 2,
+                        child: ListTile(
+                          leading: Container(
+                            padding: EdgeInsets.only(right: 12.0),
+                            decoration: new BoxDecoration(
+                              border: new Border(
+                                right: new BorderSide(
+                                    width: 1.0, color: Colors.white24),
+                              ),
+                            ),
+                            child: Icon(cardLocalisationData[index]['icon'],
+                                color: Colors.white),
+                          ),
+                          title: RichText(
+                            text: TextSpan(
+                              text: '${cardLocalisationData[index]['title']}',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          subtitle: RichText(
+                            text: TextSpan(
+                              text:
+                                  '${cardLocalisationData[index]['description']}',
+                              style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.normal),
+                            ),
+                          ),
+                          onTap: () => {
+                            _showAlert(
+                                context,
+                                '${cardLocalisationData[index]['description']}',
+                                cardLocalisationData[index]['title'])
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -178,6 +198,19 @@ class Home extends StatelessWidget {
                   backgroundColor: Colors.black87,
                   onPressed: () {
                     _showSmsDialog();
+                  }),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+                top: 10.0, left: 10.0, bottom: 70.0, right: 10.0),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                  child: Icon(Icons.share),
+                  backgroundColor: Colors.black87,
+                  onPressed: () {
+                    Share.share('$messageToSend');
                   }),
             ),
           )
@@ -193,13 +226,5 @@ class Home extends StatelessWidget {
               title: Text(title),
               content: Text(content),
             ));
-  }
-
-  double round(number) {
-    return num.parse(number.toStringAsFixed(1));
-  }
-
-  double msToKmh(double ms) {
-    return round(ms * 3.6);
   }
 }

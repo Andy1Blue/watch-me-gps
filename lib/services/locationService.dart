@@ -34,7 +34,7 @@ class LocationService {
                   timestamp: locationData.timestamp));
 
               SharedPreferencesService()
-                  .loadData('userName')
+                  .loadStringData('userName')
                   .then((userNameValue) {
                 this.userName = userNameValue;
               });

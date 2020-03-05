@@ -1,5 +1,8 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:watch_me_gps/models/locationModel.dart';
 import 'package:watch_me_gps/router/routerConsts.dart';
 import 'package:watch_me_gps/ui/map.dart';
 import 'package:watch_me_gps/ui/home.dart';
@@ -38,42 +41,74 @@ class Navigation extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    var location = Provider.of<LocationModel>(context);
+
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         title: Text('Watch Me GPS'),
         backgroundColor: Colors.black,
+        centerTitle: true,
+        // leading: new Container(
+        //   margin: const EdgeInsets.all(15.0),
+        //   child: new Icon(
+        //     Icons.gps_fixed,
+        //     color: Colors.white24,
+        //     size: 30.0,
+        //   ),
+        // ),
       ),
       backgroundColor: Colors.grey[100],
-      body: WillPopScope(
-        onWillPop: () async {
-          if (_navigatorKey.currentState.canPop()) {
-            _navigatorKey.currentState.pop();
-            return false;
-          }
-          return true;
-        },
-        child: Navigator(
-          key: _navigatorKey,
-          initialRoute: HomeViewRoute,
-          onGenerateRoute: (RouteSettings settings) {
-            WidgetBuilder builder;
-            switch (settings.name) {
-              case HomeViewRoute:
-                return MaterialPageRoute(builder: (context) => Home());
-              case MapViewRoute:
-                return MaterialPageRoute(builder: (context) => Map());
-              case SettingViewRoute:
-                return MaterialPageRoute(builder: (context) => Setting());
-              default:
-                return MaterialPageRoute(builder: (context) => Home());
-            }
-            return MaterialPageRoute(
-              builder: builder,
-              settings: settings,
-            );
-          },
-        ),
-      ),
+      body: location != null
+          ? WillPopScope(
+              onWillPop: () async {
+                if (_navigatorKey.currentState.canPop()) {
+                  _navigatorKey.currentState.pop();
+                  return true;
+                }
+                return true;
+              },
+              child: Navigator(
+                key: _navigatorKey,
+                initialRoute: HomeViewRoute,
+                onGenerateRoute: (RouteSettings settings) {
+                  WidgetBuilder builder;
+                  switch (settings.name) {
+                    case HomeViewRoute:
+                      return MaterialPageRoute(builder: (context) => Home());
+                    case MapViewRoute:
+                      return MaterialPageRoute(builder: (context) => Map());
+                    case SettingViewRoute:
+                      return MaterialPageRoute(builder: (context) => Setting());
+                    default:
+                      return MaterialPageRoute(builder: (context) => Home());
+                  }
+                  return MaterialPageRoute(
+                    builder: builder,
+                    settings: settings,
+                  );
+                },
+              ),
+            )
+          : Container(
+              color: Colors.black,
+              child: AlertDialog(
+                title: new Text("Are you sure you have on?"),
+                content: Container(
+                  child:
+                      Text("Go to the setting and turn on GPS and Internet."),
+                ),
+                actions: <Widget>[
+                   FlatButton(
+                    child: Text("Turn on GPS and Internet"),
+                    onPressed: () {
+                      AppSettings.openLocationSettings();
+                      AppSettings.openDataRoamingSettings();
+                    },
+                  ),
+                ],
+              ),
+            ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.white,
@@ -84,11 +119,13 @@ class Navigation extends State<MainPage> {
             title: new Text("Home"),
           ),
           new BottomNavigationBarItem(
-              icon: new Icon(Icons.map, color: Colors.white),
-              title: new Text("Map")),
+            icon: new Icon(Icons.map, color: Colors.white),
+            title: new Text("Map"),
+          ),
           new BottomNavigationBarItem(
-              icon: new Icon(Icons.settings, color: Colors.white),
-              title: new Text("Setting"))
+            icon: new Icon(Icons.settings, color: Colors.white),
+            title: new Text("Setting"),
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

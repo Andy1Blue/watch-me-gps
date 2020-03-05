@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:watch_me_gps/services/sharedPreferencesService.dart';
-// import 'package:watch_me_gps/utils/storage.dart';
 
 class Setting extends StatefulWidget {
   const Setting({Key key}) : super(key: key);
@@ -22,12 +20,15 @@ class _SettingState extends State<Setting> {
   TextEditingController phoneNumberTextcontroller = TextEditingController();
 
   setData() {
-    SharedPreferencesService().loadData('userName').then((userName) {
+    SharedPreferencesService().loadStringData('userName').then((userName) {
       setState(() {
         userNameTextcontroller.text = userName;
       });
     });
-    SharedPreferencesService().loadData('phoneNumber').then((phoneNumber) {
+
+    SharedPreferencesService()
+        .loadStringData('phoneNumber')
+        .then((phoneNumber) {
       setState(() {
         phoneNumberTextcontroller.text = phoneNumber;
       });
@@ -47,7 +48,7 @@ class _SettingState extends State<Setting> {
                   "Actual setting:\nUsername: ${userNameTextcontroller.text}\nPhone number for alerts: ${phoneNumberTextcontroller.text}"),
               actions: <Widget>[
                 new FlatButton(
-                  child: new Text("oK"),
+                  child: new Text("Ok"),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -57,42 +58,115 @@ class _SettingState extends State<Setting> {
           });
     }
 
+    var cardSettingData = [
+      {
+        'usernameField': 'Enter your username',
+        'controllerName': userNameTextcontroller,
+        'icon': Icons.person
+      },
+      {
+        'usernameField': 'Enter phone number for alerts',
+        'controllerName': phoneNumberTextcontroller,
+        'icon': Icons.phone
+      },
+    ];
+
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(30.0),
-        child: ListView(
-          children: <Widget>[
-            TextField(
-              decoration: InputDecoration(labelText: 'Enter your username'),
-              controller: userNameTextcontroller,
-              // onTap: () {
-              // userNameTextcontroller.clear();
-              // },
+      backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
+      body: new Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              itemCount: cardSettingData.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  padding:
+                      const EdgeInsets.only(left: 5.0, right: 5.0, top: 3.0),
+                  child: Card(
+                    color: Color.fromRGBO(64, 75, 96, 1.0),
+                    elevation: 2,
+                    child: Column(
+                      children: <Widget>[
+                        ListTile(
+                          title: RichText(
+                            text: TextSpan(
+                              text:
+                                  '${cardSettingData[index]['usernameField']}',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              flex: 1,
+                              child: Container(
+                                padding: EdgeInsets.only(bottom: 22.0),
+                                child: Icon(
+                                  cardSettingData[index]['icon'],
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                padding:
+                                    EdgeInsets.only(right: 30.0, bottom: 6),
+                                child: TextField(
+                                  maxLength: 20,
+                                  style: TextStyle(color: Colors.white),
+                                  keyboardType: TextInputType.text,
+                                  cursorWidth: 3,
+                                  decoration: InputDecoration(
+                                    // labelText: 'Enter your username',
+                                    labelStyle: TextStyle(
+                                      fontSize: 17,
+                                      color: Colors.white54,
+                                      height: 10,
+                                    ),
+                                    helperStyle: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white54,
+                                    ),
+                                    fillColor: Color.fromRGBO(58, 66, 86, 1.0),
+                                    filled: true,
+                                    border: InputBorder.none,
+                                  ),
+                                  controller: cardSettingData[index]
+                                      ['controllerName'],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-            TextField(
-              decoration:
-                  InputDecoration(labelText: 'Enter phone number for alerts'),
-              controller: phoneNumberTextcontroller,
-              // onTap: () {
-              // phoneNumberTextcontroller.clear();
-              // },
+          ),
+          RaisedButton(
+            onPressed: () {
+              SharedPreferencesService()
+                  .saveStringData('userName', userNameTextcontroller.text);
+              SharedPreferencesService().saveStringData(
+                  'phoneNumber', phoneNumberTextcontroller.text);
+              _showDialog();
+            },
+            textColor: Colors.white,
+            color: Color.fromRGBO(64, 75, 96, 1.0),
+            padding: const EdgeInsets.all(8.0),
+            child: new Text(
+              "Save",
             ),
-            RaisedButton(
-                onPressed: () {
-                  SharedPreferencesService()
-                      .saveData('userName', userNameTextcontroller.text);
-                  SharedPreferencesService()
-                      .saveData('phoneNumber', phoneNumberTextcontroller.text);
-                  _showDialog();
-                },
-                textColor: Colors.white,
-                color: Colors.red,
-                padding: const EdgeInsets.all(8.0),
-                child: new Text(
-                  "Save",
-                )),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
