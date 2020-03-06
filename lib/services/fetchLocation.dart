@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
+import 'package:watch_me_gps/models/sendDataModel.dart';
 
 class FetchLocation {
-  FetchLocation(body) {
-    _sendData(body);
+  FetchLocation(SendDataModel body) {
+    _sendData(body.toMap());
   }
 
   void _sendData(body) async {
     await DotEnv().load('.env');
-    print(DotEnv().env['URL_KEY']);
 
     Future<Response> request = post(
         '${DotEnv().env['FETCH_URL']}?myykey=${DotEnv().env['URL_KEY']}',

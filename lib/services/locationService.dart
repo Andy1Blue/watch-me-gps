@@ -8,18 +8,19 @@ import 'package:watch_me_gps/models/sendDataModel.dart';
 import 'package:watch_me_gps/services/sharedPreferencesService.dart';
 
 class LocationService {
-  LocationModel _currentLocation;
   AddressModel _currentAddress;
   Placemark place;
   String userName;
   Geolocator location = Geolocator();
+  var locationOptions = LocationOptions(
+      accuracy: LocationAccuracy.best, timeInterval: 3000);
   StreamController<LocationModel> _streamLocationController =
       StreamController<LocationModel>.broadcast();
 
   LocationService() {
     location.checkGeolocationPermissionStatus().then((granted) {
       if (granted == GeolocationStatus.granted) {
-        location.getPositionStream().listen((locationData) {
+        location.getPositionStream(locationOptions).listen((locationData) {
           location.isLocationServiceEnabled().then((service) {
             if (locationData != null) {
               getAddressFromLatLng(
@@ -39,14 +40,15 @@ class LocationService {
                 this.userName = userNameValue;
               });
 
-              var dataToSend = {
-                'user': '${userName != null ? userName : 'Flutter'}',
-                'location':
-                    '${locationData.latitude},${locationData.longitude}',
-                'data': '${locationData.timestamp}',
-                'other':
-                    '${locationData.timestamp}/${locationData.speed}/null}',
-              };
+              var dataToSend = SendDataModel(
+                  user: '${userName != null ? userName : 'Flutter'}',
+                  location:
+                      '${locationData.latitude},${locationData.longitude}',
+                  data: '${locationData.timestamp}',
+                  other:
+                      '${locationData.timestamp}/${locationData.speed}/${_currentAddress}');
+
+              print('# I have location #');
 
               FetchLocation(dataToSend);
             }
@@ -60,33 +62,11 @@ class LocationService {
 
   Stream<LocationModel> get locationStream => _streamLocationController.stream;
 
-  Future<LocationModel> getLocation() async {
-    try {
-      var _location = await location.getCurrentPosition();
-      getAddressFromLatLng(_location.latitude, _location.longitude);
-      await location.isLocationServiceEnabled().then((service) {
-        if (_location.latitude != null) {
-          _currentLocation = LocationModel(
-              latitude: _location.latitude,
-              longitude: _location.longitude,
-              altitude: _location.altitude,
-              speed: _location.speed,
-              address: _currentAddress,
-              timestamp: _location.timestamp);
-        }
-      });
-    } catch (error) {
-      print('Can\'t get the location, $error');
-    }
-
-    return _currentLocation;
-  }
-
   Future<AddressModel> getAddressFromLatLng(
       double latitude, double longitude) async {
     try {
       List<Placemark> p =
-          await Geolocator().placemarkFromCoordinates(latitude, longitude);
+          await location.placemarkFromCoordinates(latitude, longitude);
       place = p[0];
 
       _currentAddress = AddressModel(

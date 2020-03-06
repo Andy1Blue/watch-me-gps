@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
 import 'package:watch_me_gps/router/routerConsts.dart';
+import 'package:watch_me_gps/services/locationService.dart';
 import 'package:watch_me_gps/ui/map.dart';
 import 'package:watch_me_gps/ui/home.dart';
 import 'package:watch_me_gps/ui/setting.dart';
@@ -96,10 +97,10 @@ class Navigation extends State<MainPage> {
                 title: new Text("Are you sure you have on?"),
                 content: Container(
                   child:
-                      Text("Go to the setting and turn on GPS and Internet."),
+                      Text("Go to the setting and turn GPS and Internet on."),
                 ),
                 actions: <Widget>[
-                   FlatButton(
+                  FlatButton(
                     child: Text("Turn on GPS and Internet"),
                     onPressed: () {
                       AppSettings.openLocationSettings();
