@@ -66,7 +66,7 @@ class LocationService {
       double latitude, double longitude) async {
     try {
       List<Placemark> p =
-          await location.placemarkFromCoordinates(latitude, longitude);
+          await Geolocator().placemarkFromCoordinates(latitude, longitude);
       place = p[0];
 
       _currentAddress = AddressModel(

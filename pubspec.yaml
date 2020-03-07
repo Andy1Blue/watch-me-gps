@@ -33,8 +33,10 @@ dependencies:
   flutter_dotenv: ^2.1.0
   app_settings: 3.0.1
   share: 0.6.3+6
-  sms_maintained: ^0.2.5
-  
+  # sms_maintained: ^0.2.5
+  sms: ^0.2.0
+  permission_handler: '^4.4.0'
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

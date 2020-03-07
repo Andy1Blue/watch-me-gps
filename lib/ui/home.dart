@@ -1,37 +1,37 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
+import 'package:sms/sms.dart';
 import 'package:watch_me_gps/helper.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
-import 'package:watch_me_gps/services/sendSms.dart';
+import 'package:watch_me_gps/services/sms.dart';
 import 'package:watch_me_gps/services/sharedPreferencesService.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({Key key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<Home> {
+  void initState() {
+    super.initState();
+  }
+
+  bool isLoading = false;
 
   Widget build(BuildContext context) {
     Helper helper = new Helper();
     var location = Provider.of<LocationModel>(context);
 
-    final loader = SizedBox(
-        height: 40.0,
-        width: 40.0,
-        child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Colors.blue), strokeWidth: 5.0));
+    final loader = helper.loader('Wait for sms send!');
 
-    final noGpsAlert = AlertDialog(
-      title: Text("No GPS!"),
-      content: Text("Check your GPS settings."),
-      actions: <Widget>[
-        FlatButton(
-          child: Text("OK"),
-          onPressed: () {},
-        ),
-      ],
-    );
-
-    String addressText = helper.setAdressText(location);
+    String longAddressText = helper.setLongAdressText(location);
+    String shortAddressText = helper.setShortAdressText(location);
 
     String latitudeAndLongitudeText;
     if (location?.latitude != null) {
@@ -62,8 +62,72 @@ class Home extends StatelessWidget {
           'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
     }
 
-    String messageToSend =
-        '$addressText | $speedText | $googleLocationLinkText';
+    String messageToSend = '$googleLocationLinkText';
+    String messageToShare =
+        'Actual address: $longAddressText\n---\nActual speed: $speedText\n---\nLocalisation link: $googleLocationLinkText';
+
+    void _showConfirmationSmsDialog(sendSms) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            ),
+            title: new Text("Confirmation of sending",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: RichText(
+              text: sendSms
+                  ? TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Message was sent:",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text: "to ${phoneNumber[0]}",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    )
+                  : TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Message has not been sent",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text: "to $messageToSend",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        TextSpan(
+                          text: "\n\nTry again!",
+                          style: TextStyle(color: Colors.white),
+                        )
+                      ],
+                    ),
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                color: Colors.greenAccent,
+                child: new Text(
+                  "OK",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
 
     void _showSmsDialog() {
       SharedPreferencesService()
@@ -76,19 +140,70 @@ class Home extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: new Text("Do you really want send your position by SMS?"),
-            content: new Text(
-                "Recipient: ${phoneNumber[0]}\nMessage:\n$messageToSend"),
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            ),
+            title: new Text("Do you really want send your position by SMS?",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Recipient:",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: "\n${phoneNumber[0]}",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  TextSpan(
+                    text: "\n\nMessage:",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: "\n$messageToSend",
+                    style: TextStyle(color: Colors.white),
+                  )
+                ],
+              ),
+            ),
             actions: <Widget>[
               new FlatButton(
-                child: new Text("Send!"),
-                onPressed: () {
-                  SendSms('$messageToSend', phoneNumber);
+                color: Colors.greenAccent,
+                child: new Text(
+                  "Send!",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () async {
+                  setState(() {
+                    isLoading = true;
+                  });
+
+                  await Sms().send('$messageToSend', phoneNumber).then((value) {
+                    new Timer(const Duration(milliseconds: 1000), () {
+                      bool isSend = value.state == SmsMessageState.Sent;
+                      isLoading = false;
+                      _showConfirmationSmsDialog(isSend);
+                      setState(() {
+                        isLoading = false;
+                      });
+                    });
+                  });
                   Navigator.of(context).pop();
                 },
               ),
               new FlatButton(
-                child: new Text("Dont send!"),
+                color: Colors.redAccent,
+                child: new Text(
+                  "Don't send!",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -101,27 +216,27 @@ class Home extends StatelessWidget {
 
     var cardLocalisationData = [
       {
-        'title': '${timestampText ?? '-'}',
+        'title': '${timestampText ?? loadingText}',
         'description': 'Last update',
         'icon': Icons.calendar_today
       },
       {
-        'title': '${addressText ?? '-'}',
+        'title': '${longAddressText ?? loadingText}',
         'description': 'Address',
         'icon': Icons.home
       },
       {
-        'title': '${latitudeAndLongitudeText ?? '-'}',
+        'title': '${latitudeAndLongitudeText ?? loadingText}',
         'description': 'Coordinates',
         'icon': Icons.gps_fixed
       },
       {
-        'title': '${altitudeText ?? '-'}',
+        'title': '${altitudeText ?? loadingText}',
         'description': 'Altitude',
         'icon': Icons.arrow_upward
       },
       {
-        'title': '${speedText ?? '-'}',
+        'title': '${speedText ?? loadingText}',
         'description': 'Spped',
         'icon': Icons.arrow_forward_ios
       },
@@ -189,6 +304,7 @@ class Home extends StatelessWidget {
               ),
             ],
           ),
+          isLoading == true ? loader : Container(),
           Container(
             padding: const EdgeInsets.all(10.0),
             child: Align(
@@ -210,7 +326,7 @@ class Home extends StatelessWidget {
                   child: Icon(Icons.share),
                   backgroundColor: Colors.black87,
                   onPressed: () {
-                    Share.share('$messageToSend');
+                    Share.share('$messageToShare');
                   }),
             ),
           )

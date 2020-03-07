@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
+import 'package:sms/sms.dart';
 import 'package:watch_me_gps/helper.dart';
 import 'package:watch_me_gps/models/locationModel.dart';
-import 'package:watch_me_gps/services/sendSms.dart';
+import 'package:watch_me_gps/services/sms.dart';
 import 'package:watch_me_gps/services/sharedPreferencesService.dart';
 
 class Map extends StatefulWidget {
@@ -29,6 +32,7 @@ class _MyAppState extends State<Map> {
   double minZoom = 3.0;
   LatLng _location = LatLng(1, 1);
   MapController mapController = MapController();
+  bool isLoading = false;
 
   setData() {
     SharedPreferencesService().loadDoubleData('userZoom').then((userZoomSP) {
@@ -41,6 +45,8 @@ class _MyAppState extends State<Map> {
   Widget build(BuildContext context) {
     var location = Provider.of<LocationModel>(context);
     List<String> phoneNumber = [];
+    final loader = helper.loader('Wait for sms send!');
+
     String addressText;
     if (location?.address?.locality != null) {
       addressText = '';
@@ -86,32 +92,144 @@ class _MyAppState extends State<Map> {
       }
     }
 
+    void _showConfirmationSmsDialog(sendSms) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            ),
+            title: new Text("Confirmation of sending",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: RichText(
+              text: sendSms
+                  ? TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Message was sent:",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text: "to ${phoneNumber[0]}",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    )
+                  : TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Message has not been sent",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text: "to $messageToSend",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        TextSpan(
+                          text: "\n\nTry again!",
+                          style: TextStyle(color: Colors.white),
+                        )
+                      ],
+                    ),
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                color: Colors.greenAccent,
+                child: new Text(
+                  "OK",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     void _showSmsDialog() {
       SharedPreferencesService()
           .loadStringData('phoneNumber')
           .then((phoneNumberValue) {
-        setState(() {
-          phoneNumber.add(phoneNumberValue);
-        });
+        phoneNumber.add(phoneNumberValue);
       });
 
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: new Text("Do you really want send your position by SMS?"),
-            content: new Text(
-                "Recipient: ${phoneNumber[0]}\nMessage:\n$messageToSend}"),
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            ),
+            title: new Text("Do you really want send your position by SMS?",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Recipient:",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: "\n${phoneNumber[0]}",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  TextSpan(
+                    text: "\n\nMessage:",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: "\n$messageToSend",
+                    style: TextStyle(color: Colors.white),
+                  )
+                ],
+              ),
+            ),
             actions: <Widget>[
               new FlatButton(
-                child: new Text("Send!"),
-                onPressed: () {
-                  SendSms('$messageToSend', phoneNumber);
+                color: Colors.greenAccent,
+                child: new Text(
+                  "Send!",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () async {
+                  setState(() {
+                    isLoading = true;
+                  });
+
+                  await Sms().send('$messageToSend', phoneNumber).then((value) {
+                    new Timer(const Duration(milliseconds: 1000), () {
+                      bool isSend = value.state == SmsMessageState.Sent;
+                      isLoading = false;
+                      _showConfirmationSmsDialog(isSend);
+                      setState(() {
+                        isLoading = false;
+                      });
+                    });
+                  });
                   Navigator.of(context).pop();
                 },
               ),
               new FlatButton(
-                child: new Text("Dont send!"),
+                color: Colors.redAccent,
+                child: new Text(
+                  "Don't send!",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -227,16 +345,19 @@ class _MyAppState extends State<Map> {
                     ),
                   )
                 : Container(),
+            isLoading == true ? loader : Container(),
             Container(
               padding: const EdgeInsets.all(10.0),
               child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: FloatingActionButton(
-                      child: Icon(Icons.sms),
-                      backgroundColor: Colors.black87,
-                      onPressed: () {
-                        _showSmsDialog();
-                      })),
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                  child: Icon(Icons.sms),
+                  backgroundColor: Colors.black87,
+                  onPressed: () async {
+                    _showSmsDialog();
+                  },
+                ),
+              ),
             ),
             Container(
               padding: const EdgeInsets.only(
