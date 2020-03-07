@@ -88,7 +88,7 @@ class Helper {
   }
 
   String setShortAdressText(location) {
-    var addressText;
+    String addressText;
 
     if (location?.address?.postalCode != null) {
       addressText = '';
@@ -104,5 +104,56 @@ class Helper {
     }
 
     return addressText;
+  }
+
+  String setGoogleLocationLinkText(location) {
+    String googleLocationLinkText;
+
+    if (location != null) {
+      googleLocationLinkText =
+          'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
+    }
+
+    return googleLocationLinkText;
+  }
+
+  String setSpeedText(location) {
+    String speedText;
+
+    if (location?.speed != null) {
+      speedText = msToKmh(location.speed).toString() + ' km/h';
+    }
+
+    return speedText;
+  }
+
+  DateTime setTimestampText(location) {
+    DateTime timestampText;
+
+    if (location?.timestamp != null) {
+      timestampText = location.timestamp.toLocal();
+    }
+
+    return timestampText;
+  }
+
+  String setAltitudeText(location) {
+    String altitudeText;
+
+    if (location?.altitude != null) {
+      altitudeText = round(location.altitude).toString() + ' m';
+    }
+
+    return altitudeText;
+  }
+
+  String setLatitudeAndLongitudeText(location) {
+    String latitudeAndLongitudeText;
+
+    if (location?.latitude != null) {
+      latitudeAndLongitudeText = '${location.latitude}, ${location.longitude}';
+    }
+
+    return latitudeAndLongitudeText;
   }
 }

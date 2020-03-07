@@ -31,27 +31,15 @@ class _MyAppState extends State<Home> {
     final loader = helper.loader('Wait for sms send!');
 
     String longAddressText = helper.setLongAdressText(location);
-    String shortAddressText = helper.setShortAdressText(location);
 
-    String latitudeAndLongitudeText;
-    if (location?.latitude != null) {
-      latitudeAndLongitudeText = '${location.latitude}, ${location.longitude}';
-    }
+    String latitudeAndLongitudeText =
+        helper.setLatitudeAndLongitudeText(location);
 
-    String altitudeText;
-    if (location?.altitude != null) {
-      altitudeText = helper.round(location.altitude).toString() + ' m';
-    }
+    String altitudeText = helper.setAltitudeText(location);
 
-    String speedText;
-    if (location?.speed != null) {
-      speedText = helper.msToKmh(location.speed).toString() + ' km/h';
-    }
+    String speedText = helper.setSpeedText(location);
 
-    DateTime timestampText;
-    if (location?.timestamp != null) {
-      timestampText = location.timestamp.toLocal();
-    }
+    DateTime timestampText = helper.setTimestampText(location);
 
     final String loadingText = '-';
 

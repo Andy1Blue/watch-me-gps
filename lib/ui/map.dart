@@ -47,29 +47,11 @@ class _MyAppState extends State<Map> {
     List<String> phoneNumber = [];
     final loader = helper.loader('Wait for sms send!');
 
-    String addressText;
-    if (location?.address?.locality != null) {
-      addressText = '';
-      if (location.address.locality != '') {
-        addressText += location.address.locality + ' ';
-      }
-      if (location.address.thoroughfare != '') {
-        addressText += location.address.thoroughfare + ' ';
-      }
-      if (location.address.subThoroughfare != '') {
-        addressText += location.address.subThoroughfare + ' ';
-      }
-    }
-    String googleLocationLinkText;
-    if (location != null) {
-      googleLocationLinkText =
-          'http://www.google.com/maps/place/${location.latitude},${location.longitude}';
-    }
+    String addressText = helper.setShortAdressText(location);
 
-    String speedText;
-    if (location?.speed != null) {
-      speedText = helper.msToKmh(location.speed).toString() + ' km/h';
-    }
+    String googleLocationLinkText = helper.setGoogleLocationLinkText(location);
+ 
+    String speedText = helper.setSpeedText(location);
 
     String messageToSend =
         '$addressText | $speedText | $googleLocationLinkText';

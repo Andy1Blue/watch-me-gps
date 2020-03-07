@@ -14,6 +14,7 @@ class FetchLocation {
     Future<Response> request = post(
         '${DotEnv().env['FETCH_URL']}?myykey=${DotEnv().env['URL_KEY']}',
         body: body);
+
     request.then((req) {
       print('${req.statusCode}: ${req.body}');
     });
