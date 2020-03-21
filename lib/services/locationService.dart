@@ -69,9 +69,8 @@ class LocationService {
                   other:
                       "${locationData.timestamp}/${speedForSend}/$addressForSend");
 
-              print('# I have location #');
-
-              new FetchLocation(dataToSend);
+              // uncomment below to send to the server 
+              // FetchLocation(dataToSend);
             }
           });
         });
