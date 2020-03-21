@@ -28,7 +28,7 @@ class _MyAppState extends State<Home> {
     Helper helper = new Helper();
     var location = Provider.of<LocationModel>(context);
 
-    final loader = helper.loader('Wait for sms send!');
+    final loader = helper.loader('Wait for sms send!'); 
 
     String longAddressText = helper.setLongAdressText(location);
 
@@ -71,12 +71,12 @@ class _MyAppState extends State<Home> {
                   ? TextSpan(
                       children: [
                         TextSpan(
-                          text: "Message was sent:",
+                          text: "Message was sent",
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         TextSpan(
-                          text: "to ${phoneNumber[0]}",
+                          text: " to ${phoneNumber[0]}",
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
@@ -89,7 +89,7 @@ class _MyAppState extends State<Home> {
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         TextSpan(
-                          text: "to $messageToSend",
+                          text: " to $messageToSend",
                           style: TextStyle(color: Colors.white),
                         ),
                         TextSpan(
@@ -179,7 +179,7 @@ class _MyAppState extends State<Home> {
                   });
 
                   await Sms().send('$messageToSend', phoneNumber).then((value) {
-                    new Timer(const Duration(milliseconds: 1000), () {
+                    new Timer(const Duration(milliseconds: 3000), () {
                       bool isSend = value.state == SmsMessageState.Sent;
                       isLoading = false;
                       _showConfirmationSmsDialog(isSend);

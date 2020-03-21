@@ -91,12 +91,12 @@ class _MyAppState extends State<Map> {
                   ? TextSpan(
                       children: [
                         TextSpan(
-                          text: "Message was sent:",
+                          text: "Message was sent",
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         TextSpan(
-                          text: "to ${phoneNumber[0]}",
+                          text: " to ${phoneNumber[0]}",
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
@@ -109,7 +109,7 @@ class _MyAppState extends State<Map> {
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         TextSpan(
-                          text: "to $messageToSend",
+                          text: " to $messageToSend",
                           style: TextStyle(color: Colors.white),
                         ),
                         TextSpan(
@@ -199,7 +199,7 @@ class _MyAppState extends State<Map> {
                   });
 
                   await Sms().send('$messageToSend', phoneNumber).then((value) {
-                    new Timer(const Duration(milliseconds: 1000), () {
+                    new Timer(const Duration(milliseconds: 3000), () {
                       bool isSend = value.state == SmsMessageState.Sent;
                       isLoading = false;
                       _showConfirmationSmsDialog(isSend);
