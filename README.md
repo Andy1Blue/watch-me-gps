@@ -11,3 +11,12 @@ Libraries and technologies used in the project:
 - [Flutter](https://flutter.dev/)
 - [Dart](https://dart.dev/)
 - [OSM](https://www.openstreetmap.org/)
+
+## How to build app?
+
+```
+flutter clean
+flutter pub upgrade
+flutter build apk
+flutter run
+```

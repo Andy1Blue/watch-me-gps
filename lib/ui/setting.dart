@@ -151,19 +151,21 @@ class _SettingState extends State<Setting> {
               },
             ),
           ),
-          RaisedButton(
-            onPressed: () {
-              SharedPreferencesService()
-                  .saveStringData('userName', userNameTextcontroller.text);
-              SharedPreferencesService().saveStringData(
-                  'phoneNumber', phoneNumberTextcontroller.text);
-              _showDialog();
-            },
-            textColor: Colors.white,
-            color: Color.fromRGBO(64, 75, 96, 1.0),
-            padding: const EdgeInsets.all(8.0),
-            child: new Text(
-              "Save",
+          Container(
+            padding: const EdgeInsets.only(
+                top: 10.0, left: 10.0, bottom: 10.0, right: 10.0),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                  child: Icon(Icons.save),
+                  backgroundColor: Colors.black87,
+                  onPressed: () {
+                    SharedPreferencesService().saveStringData(
+                        'userName', userNameTextcontroller.text);
+                    SharedPreferencesService().saveStringData(
+                        'phoneNumber', phoneNumberTextcontroller.text);
+                    _showDialog();
+                  }),
             ),
           ),
         ],
