@@ -101,6 +101,9 @@ class _MyAppState extends State<Home> {
             ),
             actions: <Widget>[
               new FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
                 color: Colors.greenAccent,
                 child: new Text(
                   "OK",
@@ -161,6 +164,9 @@ class _MyAppState extends State<Home> {
             ),
             actions: <Widget>[
               new FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
                 color: Colors.greenAccent,
                 child: new Text(
                   "Send!",
@@ -186,6 +192,9 @@ class _MyAppState extends State<Home> {
                 },
               ),
               new FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
                 color: Colors.redAccent,
                 child: new Text(
                   "Don't send!",
@@ -225,7 +234,7 @@ class _MyAppState extends State<Home> {
       },
       {
         'title': '${speedText ?? loadingText}',
-        'description': 'Spped',
+        'description': 'Speed',
         'icon': Icons.arrow_forward_ios
       },
     ];

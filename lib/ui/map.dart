@@ -50,7 +50,7 @@ class _MyAppState extends State<Map> {
     String addressText = helper.setShortAdressText(location);
 
     String googleLocationLinkText = helper.setGoogleLocationLinkText(location);
- 
+
     String speedText = helper.setSpeedText(location);
 
     String messageToSend =
@@ -121,6 +121,9 @@ class _MyAppState extends State<Map> {
             ),
             actions: <Widget>[
               new FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
                 color: Colors.greenAccent,
                 child: new Text(
                   "OK",
@@ -181,6 +184,9 @@ class _MyAppState extends State<Map> {
             ),
             actions: <Widget>[
               new FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
                 color: Colors.greenAccent,
                 child: new Text(
                   "Send!",
@@ -206,6 +212,9 @@ class _MyAppState extends State<Map> {
                 },
               ),
               new FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
                 color: Colors.redAccent,
                 child: new Text(
                   "Don't send!",

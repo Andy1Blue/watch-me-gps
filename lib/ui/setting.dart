@@ -43,12 +43,53 @@ class _SettingState extends State<Setting> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: new Text("Settings have been saved!"),
-              content: new Text(
-                  "Actual setting:\nUsername: ${userNameTextcontroller.text}\nPhone number for alerts: ${phoneNumberTextcontroller.text}"),
+              backgroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              ),
+              title: new Text("Settings have been saved!",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+              content: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Your actual setting",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: "\n\nUsername:",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    TextSpan(
+                      text: "\n${userNameTextcontroller.text}",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text: "\n\nPhone number for alerts:",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    TextSpan(
+                      text: "\n${phoneNumberTextcontroller.text}",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
               actions: <Widget>[
                 new FlatButton(
-                  child: new Text("Ok"),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                  color: Colors.greenAccent,
+                  child: new Text(
+                    "Ok",
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold),
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
