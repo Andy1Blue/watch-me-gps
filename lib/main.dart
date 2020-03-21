@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
     return StreamProvider<LocationModel>.value(
       value: LocationService().locationStream,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Watch Me GPS',
         color: Colors.white,
         home: MainPage(),

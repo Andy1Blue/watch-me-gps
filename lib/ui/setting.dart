@@ -60,21 +60,21 @@ class _SettingState extends State<Setting> {
                     ),
                     TextSpan(
                       text: "\n\nUsername:",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     TextSpan(
                       text: "\n${userNameTextcontroller.text}",
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                          color: Colors.white),
                     ),
                     TextSpan(
                       text: "\n\nPhone number for alerts:",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     TextSpan(
                       text: "\n${phoneNumberTextcontroller.text}",
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                          color: Colors.white),
                     ),
                   ],
                 ),

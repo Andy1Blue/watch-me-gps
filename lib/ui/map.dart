@@ -54,7 +54,7 @@ class _MyAppState extends State<Map> {
     String speedText = helper.setSpeedText(location);
 
     String messageToSend =
-        '$addressText | $speedText | $googleLocationLinkText';
+        '$googleLocationLinkText';
 
     void _zoomUp() {
       if (maxZoom > userZoom) {
